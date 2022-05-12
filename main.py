@@ -1,25 +1,33 @@
 import tweepy
+from tweepy.auth import OAuthHandler
 import time
-import csv
+consumer_key="consumer_key"
+consumer_secret="consumer_secret"
+access_token="access_token"
+access_token_secret="access_token_secret"
+
+auth = tweepy.OAuthHandler(consumer_key,
+                           consumer_secret)
+auth.set_access_token(access_token,
+                       access_token_secret)
 while True:
-    time.sleep(10)
-    client = tweepy.Client(bearer_token='Bearer Token')
-    api = tweepy.API(client, wait_on_rate_limit=True, timeout=60, retry_count=10, retry_delay=30)
+    api = tweepy.API(auth, wait_on_rate_limit=True)  # set wait_on_rate_limit =True; as twitter may block you from querying if it finds you exceeding some limits
 
-    # Replace with your own search query
-    query = 'cybersecurity, hack, ransomware -is:retweet has:media'
+    search_words = ["cybersecurity"]
 
-    tweets = client.search_recent_tweets(query=query, tweet_fields=['context_annotations', 'created_at'],
-                                     media_fields=['preview_image_url'], expansions='attachments.media_keys',
-                                     max_results=100)
+    date_since = "2020-05-21"
 
-# Get list of media from the includes object
-    media = {m["media_key"]: m for m in tweets.includes['media']}
+    tweets = tweepy.Cursor(api.search_tweets, search_words,
+                                     #geocode = "20.5937,78.9629,3000km",
+                                               lang = "en", since=date_since).items(100)
+## the geocode is for India; format for geocode="lattitude,longitude,radius"
+## radius should be in miles or km
 
-    for tweet in tweets.data:
-        attachments = tweet.data['attachments']
-        media_keys = attachments['media_keys']
-        #tweet_fields = 'contaxt_annotations'
-        print(tweet.text)
-        if media[media_keys[0]].preview_image_url:
-             print(media[media_keys[0]].preview_image_url)
+
+    for tweet in tweets:
+        print("created_at: {}\nuser: {}\ntweet text: {}\ngeo_location: {}".
+            format(tweet.created_at, tweet.user.screen_name, tweet.text, tweet.user.location))
+        print("\n")
+## tweet.user.location will give you the general location of the user and not the particular location for the tweet itself, as it turns out, most of the users do not share the exact location of the tweet
+
+sleep.time(10)
