@@ -1,9 +1,9 @@
 import tweepy
-from time import time, sleep
+import time
 import csv
 while True:
     client = tweepy.Client(bearer_token='Bearer Token')
-    api = tweepy.API(client, wait_on_rate_limit=True)
+    api = tweepy.API(client, wait_on_rate_limit=True, timeout=60, retry_count=10, retry_delay=30)
 
     # Replace with your own search query
     query = 'cybersecurity, hack, ransomware -is:retweet has:media'
@@ -22,3 +22,4 @@ while True:
         print(tweet.text)
         if media[media_keys[0]].preview_image_url:
              print(media[media_keys[0]].preview_image_url)
+sleep.sleep(60)
